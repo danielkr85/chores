@@ -1,6 +1,8 @@
 package com.robertson.chores.services;
 
 import com.robertson.chores.dto.ChoreDTO;
+import com.robertson.chores.exceptions.DuplicateResourceException;
+import com.robertson.chores.exceptions.ResourceNotFoundException;
 import com.robertson.chores.models.Category;
 import com.robertson.chores.models.Chore;
 import com.robertson.chores.repositories.CategoryRepository;
@@ -32,6 +34,20 @@ public class ChoreService {
     }
 
     public ChoreDTO save(ChoreDTO choreDTO) {
+        // Check for duplicates
+        if (choreDTO.getId() == null &&
+                choreRepository.existsByNameAndCategory_Id(choreDTO.getName(), choreDTO.getCategoryId())) {
+            throw new DuplicateResourceException("Chore with name '" + choreDTO.getName() +
+                    "' already exists in this category");
+        }
+
+        if (choreDTO.getId() != null &&
+                choreRepository.existsByNameAndCategory_IdAndIdNot(
+                        choreDTO.getName(), choreDTO.getCategoryId(), choreDTO.getId())) {
+            throw new DuplicateResourceException("Chore with name '" + choreDTO.getName() +
+                    "' already exists in this category");
+        }
+
         Chore chore = toEntity(choreDTO);
         Chore savedChore = choreRepository.save(chore);
         return toDTO(savedChore);
@@ -57,7 +73,7 @@ public class ChoreService {
 
         if (dto.getCategoryId() != null) {
             Category category = categoryRepository.findById(dto.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
             chore.setCategory(category);
         }
 

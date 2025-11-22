@@ -48,14 +48,8 @@ public class CategoryController {
     public ResponseEntity<Void> deleteCategory(
             @PathVariable Long id,
             @RequestParam(required = false, defaultValue = "false") boolean force) {
-        try {
             categoryService.deleteById(id, force);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("not found")) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.badRequest().build();
-        }
+
     }
 }

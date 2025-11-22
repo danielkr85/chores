@@ -2,6 +2,8 @@ package com.robertson.chores.services;
 
 import com.robertson.chores.dto.CategoryDTO;
 import com.robertson.chores.dto.ChoreDTO;
+import com.robertson.chores.exceptions.DuplicateResourceException;
+import com.robertson.chores.exceptions.ResourceNotFoundException;
 import com.robertson.chores.repositories.CategoryRepository;
 import com.robertson.chores.models.Category;
 
@@ -30,6 +32,17 @@ public class CategoryService {
     }
 
     public CategoryDTO save(CategoryDTO categoryDTO) {
+        // Check for duplicates on create
+        if (categoryDTO.getId() == null && categoryRepository.existsByName(categoryDTO.getName())) {
+            throw new DuplicateResourceException("Category with name '" + categoryDTO.getName() + "' already exists");
+        }
+
+        // Check for duplicates on update
+        if (categoryDTO.getId() != null &&
+                categoryRepository.existsByNameAndIdNot(categoryDTO.getName(), categoryDTO.getId())) {
+            throw new DuplicateResourceException("Category with name '" + categoryDTO.getName() + "' already exists");
+        }
+
         Category category = toEntity(categoryDTO);
         Category savedCategory = categoryRepository.save(category);
         return toDTO(savedCategory);
@@ -41,7 +54,7 @@ public class CategoryService {
 
     public void deleteById(Long id, boolean force) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
         if (!force && category.getChores() != null && !category.getChores().isEmpty()) {
             throw new RuntimeException("Cannot delete category with existing chores. Use force=true to delete category and all its chores.");
