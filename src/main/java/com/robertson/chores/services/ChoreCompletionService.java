@@ -104,6 +104,16 @@ public class ChoreCompletionService {
     }
 
     /**
+     * Get all completions regardless of chore or category
+     */
+    public List<ChoreCompletionDTO> getAllCompletions() {
+        return choreCompletionRepository.findAllByOrderByCompletedAtDesc()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Get a specific completion record
      */
     public Optional<ChoreCompletionDTO> getCompletionById(Long completionId) {

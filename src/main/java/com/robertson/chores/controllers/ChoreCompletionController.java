@@ -62,6 +62,15 @@ public class ChoreCompletionController {
     }
 
     /**
+     * Get all completions
+     */
+    @GetMapping("/completions")
+    public ResponseEntity<List<ChoreCompletionDTO>> getAllCompletions() {
+        List<ChoreCompletionDTO> completions = choreCompletionService.getAllCompletions();
+        return ResponseEntity.ok(completions);
+    }
+
+    /**
      * Get the most recent completion for a chore
      */
     @GetMapping("/{choreId}/completions/latest")
