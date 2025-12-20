@@ -17,13 +17,16 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public List<CategoryDTO> getAllCategories() {
-        return categoryService.findAll();
+    public List<CategoryDTO> getAllCategories(
+            @RequestParam(required = false, defaultValue = "false") boolean includeChores)  {
+        return categoryService.findAll(includeChores);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable Long id) {
-        return categoryService.findById(id)
+    public ResponseEntity<CategoryDTO> getCategoryById(
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "false") boolean includeChores) {
+        return categoryService.findById(id, includeChores)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -35,7 +38,7 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CategoryDTO> updateCategory(@PathVariable Long id, @RequestBody CategoryDTO categoryDTO) {
-        return categoryService.findById(id)
+        return categoryService.findById(id, false)
                 .map(existingCategory -> {
                     existingCategory.setName(categoryDTO.getName());
                     CategoryDTO updatedCategory = categoryService.save(existingCategory);

@@ -7,4 +7,5 @@ public class ChoreDTO {
     private Long id;
     private String name;
     private Long categoryId;
+    private FrequencyDTO frequency;
 }

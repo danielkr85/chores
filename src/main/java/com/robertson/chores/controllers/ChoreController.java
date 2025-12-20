@@ -37,6 +37,7 @@ public class ChoreController {
                 .map(existingChore -> {
                     existingChore.setName(choreDTO.getName());
                     existingChore.setCategoryId(choreDTO.getCategoryId());
+                    existingChore.setFrequency(choreDTO.getFrequency());
                     return ResponseEntity.ok(choreService.save(existingChore));
                 })
                 .orElse(ResponseEntity.notFound().build());

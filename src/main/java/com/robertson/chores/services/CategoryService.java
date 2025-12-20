@@ -2,6 +2,7 @@ package com.robertson.chores.services;
 
 import com.robertson.chores.dto.CategoryDTO;
 import com.robertson.chores.dto.ChoreDTO;
+import com.robertson.chores.dto.FrequencyDTO;
 import com.robertson.chores.exceptions.DuplicateResourceException;
 import com.robertson.chores.exceptions.ResourceNotFoundException;
 import com.robertson.chores.repositories.CategoryRepository;
@@ -20,15 +21,15 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public List<CategoryDTO> findAll() {
+    public List<CategoryDTO> findAll(boolean includeChores) {
         return categoryRepository.findAll().stream()
-                .map(this::toDTO)
+                .map(category -> toDTO(category, includeChores))
                 .collect(Collectors.toList());
     }
 
-    public Optional<CategoryDTO> findById(Long id) {
+    public Optional<CategoryDTO> findById(Long id, boolean includeChores) {
         return categoryRepository.findById(id)
-                .map(this::toDTO);
+                .map(category -> toDTO(category, includeChores));
     }
 
     public CategoryDTO save(CategoryDTO categoryDTO) {
@@ -45,11 +46,11 @@ public class CategoryService {
 
         Category category = toEntity(categoryDTO);
         Category savedCategory = categoryRepository.save(category);
-        return toDTO(savedCategory);
+        return toDTO(savedCategory, false);  // Don't include chores by default on save
     }
 
     public void deleteById(Long id) {
-        categoryRepository.deleteById(id);
+        deleteById(id, false);
     }
 
     public void deleteById(Long id, boolean force) {
@@ -63,21 +64,35 @@ public class CategoryService {
         categoryRepository.deleteById(id);
     }
 
-    private CategoryDTO toDTO(Category category) {
+    // Mapping methods
+    private CategoryDTO toDTO(Category category, boolean includeChores) {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId());
         dto.setName(category.getName());
 
-        if (category.getChores() != null) {
+        // Only include chores if requested
+        if (includeChores && category.getChores() != null) {
             dto.setChores(category.getChores().stream()
                     .map(chore -> {
                         ChoreDTO choreDTO = new ChoreDTO();
                         choreDTO.setId(chore.getId());
                         choreDTO.setName(chore.getName());
                         choreDTO.setCategoryId(category.getId());
+
+                        // Add frequency mapping
+                        if (chore.getFrequency() != null && chore.getFrequency().getType() != null) {
+                            FrequencyDTO frequencyDTO = new FrequencyDTO(
+                                    chore.getFrequency().getType(),
+                                    chore.getFrequency().getChoreDay()
+                            );
+                            choreDTO.setFrequency(frequencyDTO);
+                        }
+
                         return choreDTO;
                     })
                     .collect(Collectors.toList()));
+        } else {
+            dto.setChores(null);  // Explicitly set to null when not including chores
         }
 
         return dto;
@@ -87,7 +102,6 @@ public class CategoryService {
         Category category = new Category();
         category.setId(dto.getId());
         category.setName(dto.getName());
-
         return category;
     }
 }
