@@ -26,5 +26,7 @@ public interface ChoreCompletionRepository extends JpaRepository<ChoreCompletion
             @Param("endDate") LocalDateTime endDate);
 
     List<ChoreCompletion> findAllByOrderByCompletedAtDesc();
+
+    List<ChoreCompletion> findAllByCompletedAtBetweenOrderByCompletedAtDesc(LocalDateTime startDate, LocalDateTime endDate);
 }
 

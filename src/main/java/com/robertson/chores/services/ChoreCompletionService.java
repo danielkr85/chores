@@ -114,6 +114,16 @@ public class ChoreCompletionService {
     }
 
     /**
+     * Get all completions regardless of chore or category within a date range
+     */
+    public List<ChoreCompletionDTO> getAllCompletionsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return choreCompletionRepository.findAllByCompletedAtBetweenOrderByCompletedAtDesc(startDate, endDate)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Get a specific completion record
      */
     public Optional<ChoreCompletionDTO> getCompletionById(Long completionId) {
