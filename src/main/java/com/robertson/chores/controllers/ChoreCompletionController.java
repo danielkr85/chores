@@ -62,6 +62,26 @@ public class ChoreCompletionController {
     }
 
     /**
+     * Get all completions
+     */
+    @GetMapping("/completions")
+    public ResponseEntity<List<ChoreCompletionDTO>> getAllCompletions() {
+        List<ChoreCompletionDTO> completions = choreCompletionService.getAllCompletions();
+        return ResponseEntity.ok(completions);
+    }
+
+    /**
+     * Get all completions within a date range
+     */
+    @GetMapping("/completions/range")
+    public ResponseEntity<List<ChoreCompletionDTO>> getAllCompletionsByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        List<ChoreCompletionDTO> completions = choreCompletionService.getAllCompletionsByDateRange(startDate, endDate);
+        return ResponseEntity.ok(completions);
+    }
+
+    /**
      * Get the most recent completion for a chore
      */
     @GetMapping("/{choreId}/completions/latest")
